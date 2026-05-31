@@ -1,0 +1,64 @@
+{
+  "name": "k2gl/tuf",
+  "description": "The Update Framework (TUF) client for PHP: a minimal, fail-closed metadata verifier and updater for securely distributed trust roots, such as Sigstore's.",
+  "homepage": "https://github.com/k2gl/tuf",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "tuf",
+    "the-update-framework",
+    "supply-chain",
+    "security",
+    "sigstore",
+    "metadata",
+    "signing",
+    "trust-root"
+  ],
+  "authors": [
+    {
+      "name": "Nickolay Harin",
+      "email": "l0gic@ya.ru"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/k2gl/tuf/issues",
+    "source": "https://github.com/k2gl/tuf"
+  },
+  "require": {
+    "php": ">=8.1",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10|^11|^12",
+    "phpstan/phpstan": "^2.1",
+    "friendsofphp/php-cs-fixer": "^3.64",
+    "k2gl/phpunit-fluent-assertions": "^12",
+    "roave/security-advisories": "dev-latest"
+  },
+  "suggest": {
+    "ext-sodium": "Ed25519 signature verification (ed25519 key scheme)",
+    "ext-openssl": "ECDSA P-256 signature verification (ecdsa-sha2-nistp256 key scheme)"
+  },
+  "autoload": {
+    "psr-4": {
+      "K2gl\\Tuf\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "K2gl\\Tuf\\Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "stable",
+  "scripts": {
+    "test": "phpunit",
+    "phpstan": "phpstan analyse",
+    "cs": "php-cs-fixer fix --dry-run --diff",
+    "cs-fix": "php-cs-fixer fix",
+    "check": [
+      "@test",
+      "@phpstan",
+      "@cs"
+    ]
+  }
+}

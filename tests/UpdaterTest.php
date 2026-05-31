@@ -1,0 +1,103 @@
+<?php
+
+declare(strict_types=1);
+
+namespace K2gl\Tuf\Tests;
+
+use K2gl\Tuf\Exception\LengthOrHashMismatchException;
+use K2gl\Tuf\Tests\Support\LocalFetcher;
+use K2gl\Tuf\Tests\Support\Meta;
+use K2gl\Tuf\Tests\Support\RepoBuilder;
+use K2gl\Tuf\Tests\Support\SigningKey;
+use K2gl\Tuf\Updater;
+
+final class UpdaterTest extends \PHPUnit\Framework\TestCase
+{
+    private const META_URL = 'https://example.test/metadata';
+    private const TARGET_URL = 'https://example.test/targets';
+    private const TARGET_CONTENT = 'abc';
+
+    public function testRefreshThenResolveAndDownloadTarget(): void
+    {
+        $repo = new RepoBuilder();
+        $fetcher = $this->publish($repo);
+
+        $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $fetcher);
+        $updater->refresh();
+
+        $info = $updater->getTargetInfo('trusted_root.json');
+        self::assertNotNull($info);
+        self::assertSame(3, $info->length);
+
+        self::assertSame(self::TARGET_CONTENT, $updater->downloadTarget($info));
+    }
+
+    public function testRefreshAppliesRootRotation(): void
+    {
+        $repo = new RepoBuilder();
+        $rootV1 = $repo->rootDoc();
+
+        // Root v2 rotates the timestamp key; only an updater that applies v2 can
+        // then accept the timestamp signed by the new key.
+        $repo->timestampKey = SigningKey::generate();
+        $repo->rootVersion = 2;
+        $rootV2 = $repo->rootDoc([$repo->rootKey]);
+
+        $fetcher = $this->publish($repo);
+        $fetcher->put(self::META_URL . '/2.root.json', $rootV2);
+
+        $updater = new Updater($rootV1, self::META_URL, self::TARGET_URL, $fetcher);
+        $updater->refresh();
+
+        self::assertNotNull($updater->getTargetInfo('trusted_root.json'));
+    }
+
+    public function testGetTargetInfoReturnsNullForUnknownTarget(): void
+    {
+        $repo = new RepoBuilder();
+        $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $this->publish($repo));
+        $updater->refresh();
+
+        self::assertNull($updater->getTargetInfo('does/not/exist'));
+    }
+
+    public function testDownloadRejectsTamperedTarget(): void
+    {
+        $repo = new RepoBuilder();
+        $fetcher = $this->publish($repo);
+        // Serve different bytes of the same length under the target's content path.
+        $fetcher->put(self::TARGET_URL . '/' . Meta::sha256(self::TARGET_CONTENT) . '.trusted_root.json', 'xyz');
+
+        $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $fetcher);
+        $updater->refresh();
+        $info = $updater->getTargetInfo('trusted_root.json');
+        self::assertNotNull($info);
+
+        $this->expectException(LengthOrHashMismatchException::class);
+        $updater->downloadTarget($info);
+    }
+
+    public function testQueryBeforeRefreshThrows(): void
+    {
+        $repo = new RepoBuilder();
+        $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $this->publish($repo));
+
+        $this->expectException(\LogicException::class);
+        $updater->getTargetInfo('trusted_root.json');
+    }
+
+    /** Publish a consistent-snapshot repository for the builder into a fresh fetcher. */
+    private function publish(RepoBuilder $repo): LocalFetcher
+    {
+        $fetcher = new LocalFetcher();
+        $fetcher->put(self::META_URL . '/timestamp.json', $repo->timestampDoc());
+        $fetcher->put(self::META_URL . '/' . $repo->snapshotVersion . '.snapshot.json', $repo->snapshotDoc());
+        $fetcher->put(self::META_URL . '/' . $repo->targetsVersion . '.targets.json', $repo->targetsDoc());
+        $fetcher->put(
+            self::TARGET_URL . '/' . Meta::sha256(self::TARGET_CONTENT) . '.trusted_root.json',
+            self::TARGET_CONTENT,
+        );
+
+        return $fetcher;
+    }
+}
