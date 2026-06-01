@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
+use function K2gl\PHPUnitFluentAssertions\fact;
+
 use K2gl\Tuf\Internal\Crypto;
 use PHPUnit\Framework\TestCase;
 
@@ -16,23 +18,23 @@ final class CryptoTest extends TestCase
         $message = 'the signed bytes';
         $signature = bin2hex(sodium_crypto_sign_detached($message, sodium_crypto_sign_secretkey($pair)));
 
-        self::assertTrue(Crypto::verify('ed25519', $public, $message, $signature));
-        self::assertFalse(Crypto::verify('ed25519', $public, 'tampered', $signature));
+        fact(Crypto::verify('ed25519', $public, $message, $signature))->true();
+        fact(Crypto::verify('ed25519', $public, 'tampered', $signature))->false();
     }
 
     public function testVerifiesEcdsaP256SignatureFromPem(): void
     {
         [$pem, $message, $signature] = self::ecdsaFixture();
 
-        self::assertTrue(Crypto::verify('ecdsa-sha2-nistp256', $pem, $message, $signature));
-        self::assertFalse(Crypto::verify('ecdsa-sha2-nistp256', $pem, 'tampered', $signature));
+        fact(Crypto::verify('ecdsa-sha2-nistp256', $pem, $message, $signature))->true();
+        fact(Crypto::verify('ecdsa-sha2-nistp256', $pem, 'tampered', $signature))->false();
     }
 
     public function testVerifiesEcdsaP256SignatureFromHexPoint(): void
     {
         [, $message, $signature, $point] = self::ecdsaFixture();
 
-        self::assertTrue(Crypto::verify('ecdsa-sha2-nistp256', $point, $message, $signature));
+        fact(Crypto::verify('ecdsa-sha2-nistp256', $point, $message, $signature))->true();
     }
 
     public function testRejectsUnsupportedScheme(): void
@@ -42,7 +44,7 @@ final class CryptoTest extends TestCase
         $message = 'x';
         $signature = bin2hex(sodium_crypto_sign_detached($message, sodium_crypto_sign_secretkey($pair)));
 
-        self::assertFalse(Crypto::verify('rsassa-pss-sha256', $public, $message, $signature));
+        fact(Crypto::verify('rsassa-pss-sha256', $public, $message, $signature))->false();
     }
 
     public function testRejectsMalformedSignatureHex(): void
@@ -50,7 +52,7 @@ final class CryptoTest extends TestCase
         $pair = sodium_crypto_sign_keypair();
         $public = bin2hex(sodium_crypto_sign_publickey($pair));
 
-        self::assertFalse(Crypto::verify('ed25519', $public, 'x', 'not-hex'));
+        fact(Crypto::verify('ed25519', $public, 'x', 'not-hex'))->false();
     }
 
     /** @return array{string, string, string, string} PEM, message, hex signature, hex uncompressed point */
@@ -60,9 +62,9 @@ final class CryptoTest extends TestCase
             'private_key_type' => OPENSSL_KEYTYPE_EC,
             'curve_name' => 'prime256v1',
         ]);
-        self::assertNotFalse($key);
+        fact($key)->notFalse();
         $details = openssl_pkey_get_details($key);
-        self::assertIsArray($details);
+        fact($details)->isArray();
         /** @var array{key: string, ec: array{x: string, y: string}} $details */
         $pem = $details['key'];
         // Left-pad each coordinate to 32 bytes; OpenSSL may strip a leading zero.
@@ -72,7 +74,7 @@ final class CryptoTest extends TestCase
 
         $message = 'message to sign';
         $signature = '';
-        self::assertTrue(openssl_sign($message, $signature, $key, OPENSSL_ALGO_SHA256));
+        fact(openssl_sign($message, $signature, $key, OPENSSL_ALGO_SHA256))->true();
 
         return [$pem, $message, bin2hex($signature), $point];
     }

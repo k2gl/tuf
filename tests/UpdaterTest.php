@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
+use function K2gl\PHPUnitFluentAssertions\fact;
+
 use K2gl\Tuf\Exception\LengthOrHashMismatchException;
 use K2gl\Tuf\Tests\Support\LocalFetcher;
 use K2gl\Tuf\Tests\Support\Meta;
@@ -26,10 +28,10 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
         $updater->refresh();
 
         $info = $updater->getTargetInfo('trusted_root.json');
-        self::assertNotNull($info);
-        self::assertSame(3, $info->length);
+        fact($info)->notNull();
+        fact($info->length)->is(3);
 
-        self::assertSame(self::TARGET_CONTENT, $updater->downloadTarget($info));
+        fact($updater->downloadTarget($info))->is(self::TARGET_CONTENT);
     }
 
     public function testRefreshAppliesRootRotation(): void
@@ -49,7 +51,7 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
         $updater = new Updater($rootV1, self::META_URL, self::TARGET_URL, $fetcher);
         $updater->refresh();
 
-        self::assertNotNull($updater->getTargetInfo('trusted_root.json'));
+        fact($updater->getTargetInfo('trusted_root.json'))->notNull();
     }
 
     public function testGetTargetInfoReturnsNullForUnknownTarget(): void
@@ -58,7 +60,7 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
         $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $this->publish($repo));
         $updater->refresh();
 
-        self::assertNull($updater->getTargetInfo('does/not/exist'));
+        fact($updater->getTargetInfo('does/not/exist'))->null();
     }
 
     public function testDownloadRejectsTamperedTarget(): void
@@ -71,7 +73,7 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
         $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $fetcher);
         $updater->refresh();
         $info = $updater->getTargetInfo('trusted_root.json');
-        self::assertNotNull($info);
+        fact($info)->notNull();
 
         $this->expectException(LengthOrHashMismatchException::class);
         $updater->downloadTarget($info);

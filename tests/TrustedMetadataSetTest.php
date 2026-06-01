@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
+use function K2gl\PHPUnitFluentAssertions\fact;
+
 use K2gl\Tuf\Exception\BadVersionException;
 use K2gl\Tuf\Exception\ExpiredMetadataException;
 use K2gl\Tuf\Exception\LengthOrHashMismatchException;
@@ -24,8 +26,8 @@ final class TrustedMetadataSetTest extends TestCase
         $set->updateSnapshot($repo->snapshotDoc());
         $targets = $set->updateTargets($repo->targetsDoc());
 
-        self::assertNotNull($targets->target('trusted_root.json'));
-        self::assertSame($targets, $set->targets());
+        fact($targets->target('trusted_root.json'))->notNull();
+        fact($set->targets())->is($targets);
     }
 
     public function testUpdateRootAcceptsNextVersion(): void
@@ -36,8 +38,8 @@ final class TrustedMetadataSetTest extends TestCase
         $repo->rootVersion = 2;
         $root = $set->updateRoot($repo->rootDoc());
 
-        self::assertSame(2, $root->version);
-        self::assertSame(2, $set->root()->version);
+        fact($root->version)->is(2);
+        fact($set->root()->version)->is(2);
     }
 
     public function testUpdateRootRejectsNonConsecutiveVersion(): void
@@ -78,7 +80,7 @@ final class TrustedMetadataSetTest extends TestCase
 
         // Signed by both: accepted.
         $root = $set->updateRoot($repo->rootDoc([$oldRootKey, $repo->rootKey]));
-        self::assertSame(2, $root->version);
+        fact($root->version)->is(2);
     }
 
     public function testCannotUpdateRootAfterTimestamp(): void
@@ -285,6 +287,6 @@ final class TrustedMetadataSetTest extends TestCase
 
         // The new timestamp key works.
         $timestamp = $set->updateTimestamp($repo->timestampDoc());
-        self::assertSame(1, $timestamp->version);
+        fact($timestamp->version)->is(1);
     }
 }

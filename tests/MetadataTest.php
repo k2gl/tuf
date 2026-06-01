@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
+use function K2gl\PHPUnitFluentAssertions\fact;
+
 use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Exception\UnsignedMetadataException;
 use K2gl\Tuf\Metadata\Metadata;
@@ -19,8 +21,8 @@ final class MetadataTest extends TestCase
         $repo = new RepoBuilder();
         $metadata = Metadata::fromJson($repo->rootDoc());
 
-        self::assertInstanceOf(Root::class, $metadata->signed);
-        self::assertSame(1, $metadata->signed->version);
+        fact($metadata->signed)->instanceOf(Root::class);
+        fact($metadata->signed->version)->is(1);
 
         $metadata->signed->verifyDelegate('root', $metadata);
         $this->addToAssertionCount(1);
@@ -33,7 +35,7 @@ final class MetadataTest extends TestCase
         $metadata = Metadata::fromJson($repo->rootDoc([SigningKey::generate()]));
 
         $root = $metadata->signed;
-        self::assertInstanceOf(Root::class, $root);
+        fact($root)->instanceOf(Root::class);
 
         $this->expectException(UnsignedMetadataException::class);
         $root->verifyDelegate('root', $metadata);
@@ -46,7 +48,7 @@ final class MetadataTest extends TestCase
         $metadata = Metadata::fromJson($repo->rootDoc());
 
         $root = $metadata->signed;
-        self::assertInstanceOf(Root::class, $root);
+        fact($root)->instanceOf(Root::class);
 
         $this->expectException(UnsignedMetadataException::class);
         $root->verifyDelegate('root', $metadata);

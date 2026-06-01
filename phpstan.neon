@@ -1,3 +1,6 @@
+includes:
+    - vendor/k2gl/phpunit-fluent-assertions/extension.neon
+
 parameters:
     level: 9
     paths:
