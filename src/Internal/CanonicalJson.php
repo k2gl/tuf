@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace K2gl\Tuf\Internal;
 
 use K2gl\Tuf\Exception\RepositoryException;
+use stdClass;
 
 /**
  * Canonical JSON as defined by securesystemslib and required by TUF for the
@@ -43,21 +44,21 @@ final class CanonicalJson
         }
 
         if (is_array($value)) {
-            if (!array_is_list($value)) {
+            if (! array_is_list($value)) {
                 throw new RepositoryException('Canonical JSON cannot encode a non-list array.');
             }
 
             return '[' . implode(',', array_map([self::class, 'encode'], $value)) . ']';
         }
 
-        if ($value instanceof \stdClass) {
+        if ($value instanceof stdClass) {
             return self::encodeObject($value);
         }
 
         throw new RepositoryException('Canonical JSON cannot encode a ' . get_debug_type($value) . '.');
     }
 
-    private static function encodeObject(\stdClass $object): string
+    private static function encodeObject(stdClass $object): string
     {
         /** @var array<string, mixed> $members */
         $members = get_object_vars($object);

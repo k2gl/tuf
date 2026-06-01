@@ -41,7 +41,7 @@ class Role
         $keyids = [];
 
         foreach (Json::list($data, 'keyids') as $keyid) {
-            if (!is_string($keyid)) {
+            if (! is_string($keyid)) {
                 throw new RepositoryException('Role keyids must be strings.');
             }
             $keyids[] = $keyid;

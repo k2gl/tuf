@@ -19,8 +19,7 @@ final class Delegations
     public function __construct(
         public readonly array $keys,
         public readonly array $roles,
-    ) {
-    }
+    ) {}
 
     /** @param array<string, mixed> $data */
     public static function fromArray(array $data): self
@@ -28,7 +27,7 @@ final class Delegations
         $keys = [];
 
         foreach (Json::object($data, 'keys') as $keyid => $key) {
-            if (!is_array($key)) {
+            if (! is_array($key)) {
                 continue;
             }
             /** @var array<string, mixed> $key */
@@ -37,7 +36,7 @@ final class Delegations
         $roles = [];
 
         foreach (Json::list($data, 'roles') as $role) {
-            if (!is_array($role)) {
+            if (! is_array($role)) {
                 continue;
             }
             /** @var array<string, mixed> $role */

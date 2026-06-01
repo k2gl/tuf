@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
-use function K2gl\PHPUnitFluentAssertions\fact;
-
 use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Internal\CanonicalJson;
 use PHPUnit\Framework\TestCase;
+
+use function K2gl\PHPUnitFluentAssertions\fact;
 
 final class CanonicalJsonTest extends TestCase
 {

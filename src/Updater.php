@@ -9,8 +9,8 @@ use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Metadata\DelegatedRole;
 use K2gl\Tuf\Metadata\TargetFile;
 use K2gl\Tuf\Metadata\Targets;
-
-use function sprintf;
+use DateTimeImmutable;
+use LogicException;
 
 /**
  * The TUF client: it refreshes the top-level metadata from a repository in the
@@ -43,7 +43,7 @@ final class Updater
         string $metadataBaseUrl,
         string $targetBaseUrl,
         private readonly Fetcher $fetcher,
-        private readonly ?\DateTimeImmutable $referenceTime = null,
+        private readonly ?DateTimeImmutable $referenceTime = null,
     ) {
         $this->metadataBaseUrl = rtrim($metadataBaseUrl, '/');
         $this->targetBaseUrl = rtrim($targetBaseUrl, '/');
@@ -136,7 +136,7 @@ final class Updater
         $meta = $snapshot->metaFor($role . '.json');
 
         if ($meta === null) {
-            throw new RepositoryException(sprintf('Snapshot does not list targets metadata "%s".', $role));
+            throw new RepositoryException(\sprintf('Snapshot does not list targets metadata "%s".', $role));
         }
         $name = $set->root()->consistentSnapshot ? $meta->version . '.' . $role . '.json' : $role . '.json';
         $bytes = $this->fetcher->fetch($this->metadataUrl($name), self::TARGETS_MAX_LENGTH);
@@ -177,7 +177,7 @@ final class Updater
         }
 
         foreach ($targets->delegations->roles as $delegation) {
-            if (!self::pathMatches($delegation, $targetPath)) {
+            if (! self::pathMatches($delegation, $targetPath)) {
                 continue;
             }
             $result = $this->search($set, $delegation->name, $role, $targetPath, $visited);
@@ -241,6 +241,6 @@ final class Updater
 
     private function requireRefreshed(): TrustedMetadataSet
     {
-        return $this->trusted ?? throw new \LogicException('Call refresh() before querying targets.');
+        return $this->trusted ?? throw new LogicException('Call refresh() before querying targets.');
     }
 }

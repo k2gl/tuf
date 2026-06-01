@@ -12,8 +12,9 @@ use K2gl\Tuf\Metadata\Root;
 use K2gl\Tuf\Metadata\Snapshot;
 use K2gl\Tuf\Metadata\Targets;
 use K2gl\Tuf\Metadata\Timestamp;
-
-use function sprintf;
+use DateTimeImmutable;
+use DateTimeZone;
+use LogicException;
 
 /**
  * The trusted set of TUF metadata, and the rules for growing it. This is the
@@ -46,11 +47,11 @@ final class TrustedMetadataSet
     /** @var array<string, Targets> delegated role name => trusted targets ("targets" is the top role) */
     private array $targets = [];
 
-    private readonly \DateTimeImmutable $referenceTime;
+    private readonly DateTimeImmutable $referenceTime;
 
-    public function __construct(string $rootBytes, ?\DateTimeImmutable $referenceTime = null)
+    public function __construct(string $rootBytes, ?DateTimeImmutable $referenceTime = null)
     {
-        $this->referenceTime = $referenceTime ?? new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $this->referenceTime = $referenceTime ?? new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $this->loadTrustedRoot($rootBytes);
     }
 
@@ -83,12 +84,12 @@ final class TrustedMetadataSet
     public function updateRoot(string $rootBytes): Root
     {
         if ($this->timestamp !== null) {
-            throw new \LogicException('Cannot update root after timestamp has been loaded.');
+            throw new LogicException('Cannot update root after timestamp has been loaded.');
         }
         $metadata = Metadata::fromJson($rootBytes);
         $newRoot = $metadata->signed;
 
-        if (!$newRoot instanceof Root) {
+        if (! $newRoot instanceof Root) {
             throw new RepositoryException('Expected root metadata.');
         }
 
@@ -96,7 +97,7 @@ final class TrustedMetadataSet
         $this->root->verifyDelegate('root', $metadata);
 
         if ($newRoot->version !== $this->root->version + 1) {
-            throw new BadVersionException(sprintf(
+            throw new BadVersionException(\sprintf(
                 'Expected root version %d, got %d.',
                 $this->root->version + 1,
                 $newRoot->version,
@@ -119,7 +120,7 @@ final class TrustedMetadataSet
     public function updateTimestamp(string $timestampBytes): Timestamp
     {
         if ($this->snapshot !== null) {
-            throw new \LogicException('Cannot update timestamp after snapshot has been loaded.');
+            throw new LogicException('Cannot update timestamp after snapshot has been loaded.');
         }
 
         if ($this->root->isExpired($this->referenceTime)) {
@@ -128,7 +129,7 @@ final class TrustedMetadataSet
         $metadata = Metadata::fromJson($timestampBytes);
         $newTimestamp = $metadata->signed;
 
-        if (!$newTimestamp instanceof Timestamp) {
+        if (! $newTimestamp instanceof Timestamp) {
             throw new RepositoryException('Expected timestamp metadata.');
         }
         $this->root->verifyDelegate('timestamp', $metadata);
@@ -160,24 +161,24 @@ final class TrustedMetadataSet
         $timestamp = $this->timestamp;
 
         if ($timestamp === null) {
-            throw new \LogicException('Cannot update snapshot before timestamp.');
+            throw new LogicException('Cannot update snapshot before timestamp.');
         }
         $this->checkFinalTimestamp();
         $snapshotMeta = $timestamp->snapshotMeta;
 
-        if (!$trusted) {
+        if (! $trusted) {
             $snapshotMeta->verify($snapshotBytes);
         }
         $metadata = Metadata::fromJson($snapshotBytes);
         $newSnapshot = $metadata->signed;
 
-        if (!$newSnapshot instanceof Snapshot) {
+        if (! $newSnapshot instanceof Snapshot) {
             throw new RepositoryException('Expected snapshot metadata.');
         }
         $this->root->verifyDelegate('snapshot', $metadata);
 
         if ($newSnapshot->version !== $snapshotMeta->version) {
-            throw new BadVersionException(sprintf(
+            throw new BadVersionException(\sprintf(
                 'Expected snapshot version %d, got %d.',
                 $snapshotMeta->version,
                 $newSnapshot->version,
@@ -189,11 +190,11 @@ final class TrustedMetadataSet
                 $candidate = $newSnapshot->metaFor($filename);
 
                 if ($candidate === null) {
-                    throw new BadVersionException(sprintf('Snapshot drops targets metadata "%s".', $filename));
+                    throw new BadVersionException(\sprintf('Snapshot drops targets metadata "%s".', $filename));
                 }
 
                 if ($candidate->version < $trustedMeta->version) {
-                    throw new BadVersionException(sprintf('Targets metadata "%s" rolled back.', $filename));
+                    throw new BadVersionException(\sprintf('Targets metadata "%s" rolled back.', $filename));
                 }
             }
         }
@@ -220,26 +221,26 @@ final class TrustedMetadataSet
         $snapshot = $this->snapshot;
 
         if ($snapshot === null) {
-            throw new \LogicException('Cannot update targets before snapshot.');
+            throw new LogicException('Cannot update targets before snapshot.');
         }
         $this->checkFinalSnapshot();
         $delegator = $this->delegator($delegatorName);
         $meta = $snapshot->metaFor($roleName . '.json');
 
         if ($meta === null) {
-            throw new RepositoryException(sprintf('Snapshot does not list targets metadata "%s".', $roleName));
+            throw new RepositoryException(\sprintf('Snapshot does not list targets metadata "%s".', $roleName));
         }
         $meta->verify($targetsBytes);
         $metadata = Metadata::fromJson($targetsBytes);
         $newTargets = $metadata->signed;
 
-        if (!$newTargets instanceof Targets) {
+        if (! $newTargets instanceof Targets) {
             throw new RepositoryException('Expected targets metadata.');
         }
         $delegator->verifyDelegate($roleName, $metadata);
 
         if ($newTargets->version !== $meta->version) {
-            throw new BadVersionException(sprintf(
+            throw new BadVersionException(\sprintf(
                 'Expected targets version %d for "%s", got %d.',
                 $meta->version,
                 $roleName,
@@ -256,7 +257,7 @@ final class TrustedMetadataSet
         $metadata = Metadata::fromJson($rootBytes);
         $root = $metadata->signed;
 
-        if (!$root instanceof Root) {
+        if (! $root instanceof Root) {
             throw new RepositoryException('Expected root metadata.');
         }
 
@@ -273,7 +274,7 @@ final class TrustedMetadataSet
         }
 
         return $this->targets[$delegatorName]
-            ?? throw new \LogicException(sprintf('Delegating role "%s" has not been loaded.', $delegatorName));
+            ?? throw new LogicException(\sprintf('Delegating role "%s" has not been loaded.', $delegatorName));
     }
 
     private function checkFinalTimestamp(): void

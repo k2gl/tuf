@@ -18,8 +18,7 @@ final class Key
         public readonly string $keytype,
         public readonly string $scheme,
         public readonly string $public,
-    ) {
-    }
+    ) {}
 
     /** @param array<string, mixed> $data */
     public static function fromArray(array $data): self

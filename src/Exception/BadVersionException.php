@@ -9,6 +9,4 @@ namespace K2gl\Tuf\Exception;
  * older version, a snapshot/targets version that does not match its referrer,
  * or a root version that is not exactly one greater than the trusted one.
  */
-class BadVersionException extends RepositoryException
-{
-}
+class BadVersionException extends RepositoryException {}

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Internal;
 
+use SodiumException;
+
 /**
  * Signature verification for the key schemes this version supports:
  *
@@ -40,7 +42,7 @@ final class Crypto
 
     private static function verifyEd25519(string $publicKeyHex, string $message, string $signature): bool
     {
-        if (!\function_exists('sodium_crypto_sign_verify_detached')) {
+        if (! \function_exists('sodium_crypto_sign_verify_detached')) {
             return false;
         }
         $publicKey = self::hexToBin($publicKeyHex);
@@ -55,14 +57,14 @@ final class Crypto
 
         try {
             return sodium_crypto_sign_verify_detached($signature, $message, $publicKey);
-        } catch (\SodiumException) {
+        } catch (SodiumException) {
             return false;
         }
     }
 
     private static function verifyEcdsaP256(string $publicKey, string $message, string $signature): bool
     {
-        if (!\function_exists('openssl_verify')) {
+        if (! \function_exists('openssl_verify')) {
             return false;
         }
         $pem = self::ecdsaPublicKeyPem($publicKey);
@@ -104,7 +106,7 @@ final class Crypto
 
     private static function hexToBin(string $hex): ?string
     {
-        if ($hex === '' || \strlen($hex) % 2 !== 0 || !ctype_xdigit($hex)) {
+        if ($hex === '' || \strlen($hex) % 2 !== 0 || ! ctype_xdigit($hex)) {
             return null;
         }
         $bin = @hex2bin($hex);

@@ -9,8 +9,6 @@ use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Internal\Hashes;
 use K2gl\Tuf\Internal\Json;
 
-use function sprintf;
-
 /**
  * A target listed in targets metadata: the path it is published under, the exact
  * length and hashes its content must have, and any opaque `custom` data the
@@ -57,7 +55,7 @@ final class TargetFile
     public function verifyLengthAndHashes(string $bytes): void
     {
         if (\strlen($bytes) !== $this->length) {
-            throw new LengthOrHashMismatchException(sprintf(
+            throw new LengthOrHashMismatchException(\sprintf(
                 'Target "%s" length mismatch: expected %d bytes, got %d.',
                 $this->path,
                 $this->length,

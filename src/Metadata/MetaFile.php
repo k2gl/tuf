@@ -9,8 +9,6 @@ use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Internal\Hashes;
 use K2gl\Tuf\Internal\Json;
 
-use function sprintf;
-
 /**
  * A reference, inside timestamp or snapshot metadata, to another metadata file:
  * its version, and optionally the length and hashes the referenced file must
@@ -44,7 +42,7 @@ final class MetaFile
     public function verify(string $bytes): void
     {
         if ($this->length !== null && \strlen($bytes) !== $this->length) {
-            throw new LengthOrHashMismatchException(sprintf(
+            throw new LengthOrHashMismatchException(\sprintf(
                 'Length mismatch: expected %d bytes, got %d.',
                 $this->length,
                 \strlen($bytes),

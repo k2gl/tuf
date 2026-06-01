@@ -6,8 +6,7 @@ namespace K2gl\Tuf\Metadata;
 
 use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Internal\Json;
-
-use function sprintf;
+use DateTimeImmutable;
 
 /**
  * Targets metadata: what the repository actually vouches for. It lists each
@@ -20,7 +19,7 @@ final class Targets extends Signed
     public function __construct(
         string $specVersion,
         int $version,
-        \DateTimeImmutable $expires,
+        DateTimeImmutable $expires,
         public readonly array $targets,
         public readonly ?Delegations $delegations = null,
     ) {
@@ -34,7 +33,7 @@ final class Targets extends Signed
         $targets = [];
 
         foreach (Json::object($signed, 'targets') as $path => $target) {
-            if (!is_array($target)) {
+            if (! is_array($target)) {
                 throw new RepositoryException('Targets "targets" must map paths to target objects.');
             }
             /** @var array<string, mixed> $target */
@@ -62,7 +61,7 @@ final class Targets extends Signed
     public function verifyDelegate(string $roleName, Metadata $metadata): void
     {
         if ($this->delegations === null) {
-            throw new RepositoryException(sprintf('No delegations to verify role "%s".', $roleName));
+            throw new RepositoryException(\sprintf('No delegations to verify role "%s".', $roleName));
         }
 
         foreach ($this->delegations->roles as $role) {
@@ -73,6 +72,6 @@ final class Targets extends Signed
             }
         }
 
-        throw new RepositoryException(sprintf('No delegated role "%s".', $roleName));
+        throw new RepositoryException(\sprintf('No delegated role "%s".', $roleName));
     }
 }

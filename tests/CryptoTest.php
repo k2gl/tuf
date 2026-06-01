@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
-use function K2gl\PHPUnitFluentAssertions\fact;
-
 use K2gl\Tuf\Internal\Crypto;
 use PHPUnit\Framework\TestCase;
+
+use function K2gl\PHPUnitFluentAssertions\fact;
 
 final class CryptoTest extends TestCase
 {

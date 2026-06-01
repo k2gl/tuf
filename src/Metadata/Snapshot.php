@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace K2gl\Tuf\Metadata;
 
 use K2gl\Tuf\Internal\Json;
+use DateTimeImmutable;
 
 /**
  * Snapshot metadata: the consistent view of the repository. It records the
@@ -17,7 +18,7 @@ final class Snapshot extends Signed
     public function __construct(
         string $specVersion,
         int $version,
-        \DateTimeImmutable $expires,
+        DateTimeImmutable $expires,
         public readonly array $meta,
     ) {
         parent::__construct('snapshot', $specVersion, $version, $expires);
@@ -29,7 +30,7 @@ final class Snapshot extends Signed
         $meta = [];
 
         foreach (Json::object($signed, 'meta') as $filename => $entry) {
-            if (!is_array($entry)) {
+            if (! is_array($entry)) {
                 continue;
             }
             /** @var array<string, mixed> $entry */

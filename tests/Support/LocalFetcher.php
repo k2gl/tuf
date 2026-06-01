@@ -7,8 +7,6 @@ namespace K2gl\Tuf\Tests\Support;
 use K2gl\Tuf\Exception\DownloadException;
 use K2gl\Tuf\Fetcher;
 
-use function sprintf;
-
 /**
  * An in-memory {@see Fetcher} over a fixed url => bytes map, so the full client
  * workflow can be exercised offline. A missing URL throws, exactly as a "not
@@ -17,9 +15,7 @@ use function sprintf;
 final class LocalFetcher implements Fetcher
 {
     /** @param array<string, string> $files url => bytes */
-    public function __construct(private array $files = [])
-    {
-    }
+    public function __construct(private array $files = []) {}
 
     public function put(string $url, string $bytes): void
     {
@@ -28,10 +24,10 @@ final class LocalFetcher implements Fetcher
 
     public function fetch(string $url, int $maxLength): string
     {
-        $bytes = $this->files[$url] ?? throw new DownloadException(sprintf('Not found: %s', $url));
+        $bytes = $this->files[$url] ?? throw new DownloadException(\sprintf('Not found: %s', $url));
 
         if (\strlen($bytes) > $maxLength) {
-            throw new DownloadException(sprintf('Response for "%s" exceeds %d bytes.', $url, $maxLength));
+            throw new DownloadException(\sprintf('Response for "%s" exceeds %d bytes.', $url, $maxLength));
         }
 
         return $bytes;

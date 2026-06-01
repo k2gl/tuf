@@ -7,8 +7,6 @@ namespace K2gl\Tuf\Metadata;
 use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Internal\Json;
 
-use function sprintf;
-
 /**
  * A delegated targets role: a named {@see Role} that a targets metadata file
  * hands part of its namespace to, restricted to the paths (or path-hash
@@ -54,8 +52,8 @@ final class DelegatedRole extends Role
         $values = [];
 
         foreach (Json::list($data, $key) as $value) {
-            if (!is_string($value)) {
-                throw new RepositoryException(sprintf('"%s" must be a list of strings.', $key));
+            if (! is_string($value)) {
+                throw new RepositoryException(\sprintf('"%s" must be a list of strings.', $key));
             }
             $values[] = $value;
         }

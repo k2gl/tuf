@@ -6,8 +6,8 @@ namespace K2gl\Tuf\Metadata;
 
 use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Internal\Json;
-
-use function sprintf;
+use DateTimeImmutable;
+use DateTimeZone;
 
 /**
  * The payload of a TUF metadata file: the `signed` object that signatures are
@@ -22,7 +22,7 @@ abstract class Signed
         public readonly string $type,
         public readonly string $specVersion,
         public readonly int $version,
-        public readonly \DateTimeImmutable $expires,
+        public readonly DateTimeImmutable $expires,
     ) {
         if ($version < 1) {
             throw new RepositoryException('Metadata version must be at least 1.');
@@ -44,12 +44,12 @@ abstract class Signed
             'timestamp' => Timestamp::fromArray($signed),
             'snapshot' => Snapshot::fromArray($signed),
             'targets' => Targets::fromArray($signed),
-            default => throw new RepositoryException(sprintf('Unknown metadata type "%s".', $type)),
+            default => throw new RepositoryException(\sprintf('Unknown metadata type "%s".', $type)),
         };
     }
 
     /** Whether the metadata is expired relative to the given reference time. */
-    public function isExpired(\DateTimeImmutable $reference): bool
+    public function isExpired(DateTimeImmutable $reference): bool
     {
         return $reference >= $this->expires;
     }
@@ -60,20 +60,20 @@ abstract class Signed
         $type = Json::string($signed, '_type');
 
         if ($type !== $expected) {
-            throw new RepositoryException(sprintf('Expected "%s" metadata, got "%s".', $expected, $type));
+            throw new RepositoryException(\sprintf('Expected "%s" metadata, got "%s".', $expected, $type));
         }
 
         return $type;
     }
 
     /** @param array<string, mixed> $signed */
-    protected static function parseExpires(array $signed): \DateTimeImmutable
+    protected static function parseExpires(array $signed): DateTimeImmutable
     {
         $raw = Json::string($signed, 'expires');
-        $expires = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s\Z', $raw, new \DateTimeZone('UTC'));
+        $expires = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s\Z', $raw, new DateTimeZone('UTC'));
 
         if ($expires === false) {
-            throw new RepositoryException(sprintf('Invalid "expires" timestamp "%s".', $raw));
+            throw new RepositoryException(\sprintf('Invalid "expires" timestamp "%s".', $raw));
         }
 
         return $expires;

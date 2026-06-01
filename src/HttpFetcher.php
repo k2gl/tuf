@@ -6,8 +6,6 @@ namespace K2gl\Tuf;
 
 use K2gl\Tuf\Exception\DownloadException;
 
-use function sprintf;
-
 /**
  * The default {@see Fetcher}: an HTTPS client built on cURL when available,
  * falling back to a stream context. It enforces the byte cap, treats any non-2xx
@@ -17,20 +15,19 @@ final class HttpFetcher implements Fetcher
 {
     public function __construct(
         private readonly int $timeoutSeconds = 30,
-    ) {
-    }
+    ) {}
 
     public function fetch(string $url, int $maxLength): string
     {
-        if (!str_starts_with($url, 'https://') && !str_starts_with($url, 'http://')) {
-            throw new DownloadException(sprintf('Refusing to fetch non-HTTP(S) URL "%s".', $url));
+        if (! str_starts_with($url, 'https://') && ! str_starts_with($url, 'http://')) {
+            throw new DownloadException(\sprintf('Refusing to fetch non-HTTP(S) URL "%s".', $url));
         }
         $body = \function_exists('curl_init')
             ? $this->fetchWithCurl($url, $maxLength)
             : $this->fetchWithStream($url, $maxLength);
 
         if (\strlen($body) > $maxLength) {
-            throw new DownloadException(sprintf('Response for "%s" exceeds %d bytes.', $url, $maxLength));
+            throw new DownloadException(\sprintf('Response for "%s" exceeds %d bytes.', $url, $maxLength));
         }
 
         return $body;
@@ -41,7 +38,7 @@ final class HttpFetcher implements Fetcher
         $handle = curl_init($url);
 
         if ($handle === false) {
-            throw new DownloadException(sprintf('Could not initialise a request for "%s".', $url));
+            throw new DownloadException(\sprintf('Could not initialise a request for "%s".', $url));
         }
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($handle, CURLOPT_FOLLOWLOCATION, false);
@@ -60,12 +57,12 @@ final class HttpFetcher implements Fetcher
         $error = curl_error($handle);
         curl_close($handle);
 
-        if (!is_string($body) || $error !== '') {
-            throw new DownloadException(sprintf('Failed to fetch "%s": %s', $url, $error === '' ? 'unknown error' : $error));
+        if (! is_string($body) || $error !== '') {
+            throw new DownloadException(\sprintf('Failed to fetch "%s": %s', $url, $error === '' ? 'unknown error' : $error));
         }
 
         if ($status < 200 || $status >= 300) {
-            throw new DownloadException(sprintf('Fetching "%s" returned HTTP %d.', $url, $status));
+            throw new DownloadException(\sprintf('Fetching "%s" returned HTTP %d.', $url, $status));
         }
 
         return $body;
@@ -79,14 +76,14 @@ final class HttpFetcher implements Fetcher
         $stream = @fopen($url, 'rb', false, $context);
 
         if ($stream === false) {
-            throw new DownloadException(sprintf('Failed to open "%s".', $url));
+            throw new DownloadException(\sprintf('Failed to open "%s".', $url));
         }
         $body = stream_get_contents($stream, $maxLength + 1);
         $meta = stream_get_meta_data($stream);
         fclose($stream);
 
         if ($body === false) {
-            throw new DownloadException(sprintf('Failed to read "%s".', $url));
+            throw new DownloadException(\sprintf('Failed to read "%s".', $url));
         }
         $this->assertOkStatus($url, $meta['wrapper_data'] ?? null);
 
@@ -95,7 +92,7 @@ final class HttpFetcher implements Fetcher
 
     private function assertOkStatus(string $url, mixed $headers): void
     {
-        if (!is_array($headers)) {
+        if (! is_array($headers)) {
             return;
         }
 
@@ -104,7 +101,7 @@ final class HttpFetcher implements Fetcher
                 $status = (int) $m[1];
 
                 if ($status < 200 || $status >= 300) {
-                    throw new DownloadException(sprintf('Fetching "%s" returned HTTP %d.', $url, $status));
+                    throw new DownloadException(\sprintf('Fetching "%s" returned HTTP %d.', $url, $status));
                 }
             }
         }

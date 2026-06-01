@@ -14,8 +14,7 @@ final class SigningKey
         public readonly string $keyid,
         public readonly string $publicHex,
         private readonly string $secret,
-    ) {
-    }
+    ) {}
 
     public static function generate(): self
     {

@@ -6,8 +6,7 @@ namespace K2gl\Tuf\Metadata;
 
 use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Internal\Json;
-
-use function sprintf;
+use DateTimeImmutable;
 
 /**
  * Root metadata: the trust anchor. It lists every key the repository uses and,
@@ -25,7 +24,7 @@ final class Root extends Signed
     public function __construct(
         string $specVersion,
         int $version,
-        \DateTimeImmutable $expires,
+        DateTimeImmutable $expires,
         public readonly bool $consistentSnapshot,
         public readonly array $keys,
         public readonly array $roles,
@@ -33,8 +32,8 @@ final class Root extends Signed
         parent::__construct('root', $specVersion, $version, $expires);
 
         foreach (self::TOP_LEVEL_ROLES as $name) {
-            if (!isset($this->roles[$name])) {
-                throw new RepositoryException(sprintf('Root metadata is missing the "%s" role.', $name));
+            if (! isset($this->roles[$name])) {
+                throw new RepositoryException(\sprintf('Root metadata is missing the "%s" role.', $name));
             }
         }
     }
@@ -46,7 +45,7 @@ final class Root extends Signed
         $keys = [];
 
         foreach (Json::object($signed, 'keys') as $keyid => $key) {
-            if (!is_array($key)) {
+            if (! is_array($key)) {
                 throw new RepositoryException('Root "keys" must map key ids to key objects.');
             }
             /** @var array<string, mixed> $key */
@@ -55,7 +54,7 @@ final class Root extends Signed
         $roles = [];
 
         foreach (Json::object($signed, 'roles') as $name => $role) {
-            if (!is_array($role)) {
+            if (! is_array($role)) {
                 throw new RepositoryException('Root "roles" must map role names to role objects.');
             }
             /** @var array<string, mixed> $role */
@@ -74,7 +73,7 @@ final class Root extends Signed
 
     public function role(string $name): Role
     {
-        return $this->roles[$name] ?? throw new RepositoryException(sprintf('No such role "%s".', $name));
+        return $this->roles[$name] ?? throw new RepositoryException(\sprintf('No such role "%s".', $name));
     }
 
     /**

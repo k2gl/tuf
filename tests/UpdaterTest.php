@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
-use function K2gl\PHPUnitFluentAssertions\fact;
-
 use K2gl\Tuf\Exception\LengthOrHashMismatchException;
 use K2gl\Tuf\Tests\Support\LocalFetcher;
 use K2gl\Tuf\Tests\Support\Meta;
 use K2gl\Tuf\Tests\Support\RepoBuilder;
 use K2gl\Tuf\Tests\Support\SigningKey;
 use K2gl\Tuf\Updater;
+use LogicException;
+
+use function K2gl\PHPUnitFluentAssertions\fact;
 
 final class UpdaterTest extends \PHPUnit\Framework\TestCase
 {
@@ -21,7 +22,7 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
 
     public function testRefreshThenResolveAndDownloadTarget(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $fetcher = $this->publish($repo);
 
         $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $fetcher);
@@ -36,7 +37,7 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
 
     public function testRefreshAppliesRootRotation(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $rootV1 = $repo->rootDoc();
 
         // Root v2 rotates the timestamp key; only an updater that applies v2 can
@@ -56,7 +57,7 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
 
     public function testGetTargetInfoReturnsNullForUnknownTarget(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $this->publish($repo));
         $updater->refresh();
 
@@ -65,7 +66,7 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
 
     public function testDownloadRejectsTamperedTarget(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $fetcher = $this->publish($repo);
         // Serve different bytes of the same length under the target's content path.
         $fetcher->put(self::TARGET_URL . '/' . Meta::sha256(self::TARGET_CONTENT) . '.trusted_root.json', 'xyz');
@@ -81,17 +82,17 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
 
     public function testQueryBeforeRefreshThrows(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $this->publish($repo));
 
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $updater->getTargetInfo('trusted_root.json');
     }
 
     /** Publish a consistent-snapshot repository for the builder into a fresh fetcher. */
     private function publish(RepoBuilder $repo): LocalFetcher
     {
-        $fetcher = new LocalFetcher();
+        $fetcher = new LocalFetcher;
         $fetcher->put(self::META_URL . '/timestamp.json', $repo->timestampDoc());
         $fetcher->put(self::META_URL . '/' . $repo->snapshotVersion . '.snapshot.json', $repo->snapshotDoc());
         $fetcher->put(self::META_URL . '/' . $repo->targetsVersion . '.targets.json', $repo->targetsDoc());

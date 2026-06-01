@@ -7,8 +7,6 @@ namespace K2gl\Tuf\Internal;
 use K2gl\Tuf\Exception\LengthOrHashMismatchException;
 use K2gl\Tuf\Exception\RepositoryException;
 
-use function sprintf;
-
 /**
  * Parses and verifies the `hashes` maps (algorithm => hex digest) that TUF
  * metadata records for the files it refers to.
@@ -30,8 +28,8 @@ final class Hashes
         $hashes = [];
 
         foreach ($data as $algorithm => $digest) {
-            if (!is_string($digest)) {
-                throw new RepositoryException(sprintf('Hash digest for "%s" must be a string.', $algorithm));
+            if (! is_string($digest)) {
+                throw new RepositoryException(\sprintf('Hash digest for "%s" must be a string.', $algorithm));
             }
             $hashes[$algorithm] = $digest;
         }
@@ -51,12 +49,12 @@ final class Hashes
     {
         foreach ($hashes as $algorithm => $expected) {
             $php = self::SUPPORTED[$algorithm] ?? throw new LengthOrHashMismatchException(
-                sprintf('Unsupported hash algorithm "%s".', $algorithm),
+                \sprintf('Unsupported hash algorithm "%s".', $algorithm),
             );
             $actual = hash($php, $bytes);
 
-            if (!hash_equals($actual, strtolower($expected))) {
-                throw new LengthOrHashMismatchException(sprintf('Hash mismatch for "%s".', $algorithm));
+            if (! hash_equals($actual, strtolower($expected))) {
+                throw new LengthOrHashMismatchException(\sprintf('Hash mismatch for "%s".', $algorithm));
             }
         }
     }

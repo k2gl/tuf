@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace K2gl\Tuf\Metadata;
 
 use K2gl\Tuf\Internal\Json;
+use DateTimeImmutable;
 
 /**
  * Timestamp metadata: the frequently-resigned pointer to the current snapshot.
@@ -16,7 +17,7 @@ final class Timestamp extends Signed
     public function __construct(
         string $specVersion,
         int $version,
-        \DateTimeImmutable $expires,
+        DateTimeImmutable $expires,
         public readonly MetaFile $snapshotMeta,
     ) {
         parent::__construct('timestamp', $specVersion, $version, $expires);

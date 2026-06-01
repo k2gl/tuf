@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace K2gl\Tuf\Internal;
 
 use K2gl\Tuf\Exception\RepositoryException;
-
-use function sprintf;
+use JsonException;
 
 /**
  * Minimal typed accessors over a json_decode associative array. Every failure is
@@ -20,11 +19,11 @@ final class Json
         try {
             /** @var mixed $data */
             $data = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new RepositoryException('Metadata is not valid JSON: ' . $e->getMessage(), previous: $e);
         }
 
-        if (!is_array($data) || (array_is_list($data) && $data !== [])) {
+        if (! is_array($data) || (array_is_list($data) && $data !== [])) {
             throw new RepositoryException('Expected a JSON object at the document root.');
         }
 
@@ -37,8 +36,8 @@ final class Json
     {
         $value = $data[$key] ?? null;
 
-        if (!is_string($value)) {
-            throw new RepositoryException(sprintf('Expected string at "%s".', $key));
+        if (! is_string($value)) {
+            throw new RepositoryException(\sprintf('Expected string at "%s".', $key));
         }
 
         return $value;
@@ -49,8 +48,8 @@ final class Json
     {
         $value = $data[$key] ?? null;
 
-        if (!is_int($value)) {
-            throw new RepositoryException(sprintf('Expected integer at "%s".', $key));
+        if (! is_int($value)) {
+            throw new RepositoryException(\sprintf('Expected integer at "%s".', $key));
         }
 
         return $value;
@@ -61,8 +60,8 @@ final class Json
     {
         $value = $data[$key] ?? null;
 
-        if (!is_bool($value)) {
-            throw new RepositoryException(sprintf('Expected boolean at "%s".', $key));
+        if (! is_bool($value)) {
+            throw new RepositoryException(\sprintf('Expected boolean at "%s".', $key));
         }
 
         return $value;
@@ -76,8 +75,8 @@ final class Json
     {
         $value = $data[$key] ?? null;
 
-        if (!is_array($value) || (array_is_list($value) && $value !== [])) {
-            throw new RepositoryException(sprintf('Expected object at "%s".', $key));
+        if (! is_array($value) || (array_is_list($value) && $value !== [])) {
+            throw new RepositoryException(\sprintf('Expected object at "%s".', $key));
         }
 
         /** @var array<string, mixed> $value */
@@ -92,8 +91,8 @@ final class Json
     {
         $value = $data[$key] ?? null;
 
-        if (!is_array($value) || !array_is_list($value)) {
-            throw new RepositoryException(sprintf('Expected array at "%s".', $key));
+        if (! is_array($value) || ! array_is_list($value)) {
+            throw new RepositoryException(\sprintf('Expected array at "%s".', $key));
         }
 
         /** @var list<mixed> $value */

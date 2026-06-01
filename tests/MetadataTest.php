@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
-use function K2gl\PHPUnitFluentAssertions\fact;
-
 use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Exception\UnsignedMetadataException;
 use K2gl\Tuf\Metadata\Metadata;
@@ -14,11 +12,13 @@ use K2gl\Tuf\Tests\Support\RepoBuilder;
 use K2gl\Tuf\Tests\Support\SigningKey;
 use PHPUnit\Framework\TestCase;
 
+use function K2gl\PHPUnitFluentAssertions\fact;
+
 final class MetadataTest extends TestCase
 {
     public function testParsesRootAndVerifiesItsOwnSignature(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $metadata = Metadata::fromJson($repo->rootDoc());
 
         fact($metadata->signed)->instanceOf(Root::class);
@@ -30,7 +30,7 @@ final class MetadataTest extends TestCase
 
     public function testRejectsMetadataNotSignedByRole(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         // Sign the root payload with an unrelated key, not the configured root key.
         $metadata = Metadata::fromJson($repo->rootDoc([SigningKey::generate()]));
 
@@ -43,7 +43,7 @@ final class MetadataTest extends TestCase
 
     public function testRejectsThresholdNotMet(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $repo->rootThreshold = 2; // one signature cannot satisfy a threshold of two
         $metadata = Metadata::fromJson($repo->rootDoc());
 

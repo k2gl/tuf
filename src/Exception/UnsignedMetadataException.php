@@ -7,6 +7,4 @@ namespace K2gl\Tuf\Exception;
 /**
  * Metadata is not signed by the threshold of authorised keys for its role.
  */
-class UnsignedMetadataException extends RepositoryException
-{
-}
+class UnsignedMetadataException extends RepositoryException {}

@@ -8,8 +8,8 @@ use K2gl\Tuf\Exception\RepositoryException;
 use K2gl\Tuf\Exception\UnsignedMetadataException;
 use K2gl\Tuf\Internal\CanonicalJson;
 use K2gl\Tuf\Internal\Json;
-
-use function sprintf;
+use JsonException;
+use stdClass;
 
 /**
  * A signed TUF metadata file: its `signed` payload, the signatures over it, and
@@ -28,23 +28,22 @@ final class Metadata
         public readonly Signed $signed,
         private readonly array $signatures,
         private readonly string $signedBytes,
-    ) {
-    }
+    ) {}
 
     public static function fromJson(string $json): self
     {
         try {
             /** @var mixed $root */
             $root = json_decode($json, false, flags: JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new RepositoryException('Metadata is not valid JSON: ' . $e->getMessage(), previous: $e);
         }
 
-        if (!$root instanceof \stdClass || !isset($root->signed) || !isset($root->signatures)) {
+        if (! $root instanceof stdClass || ! isset($root->signed) || ! isset($root->signatures)) {
             throw new RepositoryException('Metadata must be an object with "signed" and "signatures".');
         }
 
-        if (!$root->signed instanceof \stdClass) {
+        if (! $root->signed instanceof stdClass) {
             throw new RepositoryException('Metadata "signed" must be an object.');
         }
 
@@ -88,7 +87,7 @@ final class Metadata
         }
 
         if (\count($verified) < $role->threshold) {
-            throw new UnsignedMetadataException(sprintf(
+            throw new UnsignedMetadataException(\sprintf(
                 'Role "%s" requires %d signature(s) but only %d verified.',
                 $roleName,
                 $role->threshold,
@@ -103,13 +102,13 @@ final class Metadata
      */
     private static function signatures(mixed $signatures): array
     {
-        if (!is_array($signatures)) {
+        if (! is_array($signatures)) {
             throw new RepositoryException('Metadata "signatures" must be an array.');
         }
         $result = [];
 
         foreach ($signatures as $signature) {
-            if (!$signature instanceof \stdClass) {
+            if (! $signature instanceof stdClass) {
                 throw new RepositoryException('Each signature must be an object.');
             }
             /** @var array<string, mixed> $entry */

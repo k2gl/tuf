@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace K2gl\Tuf\Tests;
 
-use function K2gl\PHPUnitFluentAssertions\fact;
-
 use K2gl\Tuf\Exception\BadVersionException;
 use K2gl\Tuf\Exception\ExpiredMetadataException;
 use K2gl\Tuf\Exception\LengthOrHashMismatchException;
@@ -15,12 +13,15 @@ use K2gl\Tuf\Tests\Support\RepoBuilder;
 use K2gl\Tuf\Tests\Support\SigningKey;
 use K2gl\Tuf\TrustedMetadataSet;
 use PHPUnit\Framework\TestCase;
+use LogicException;
+
+use function K2gl\PHPUnitFluentAssertions\fact;
 
 final class TrustedMetadataSetTest extends TestCase
 {
     public function testHappyPathLoadsAllRoles(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
         $set->updateTimestamp($repo->timestampDoc());
         $set->updateSnapshot($repo->snapshotDoc());
@@ -32,7 +33,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testUpdateRootAcceptsNextVersion(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         $repo->rootVersion = 2;
@@ -44,7 +45,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testUpdateRootRejectsNonConsecutiveVersion(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         $repo->rootVersion = 3;
@@ -55,7 +56,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testUpdateRootRequiresBothOldAndNewKeys(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         $oldRootKey = $repo->rootKey;
@@ -85,19 +86,19 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testCannotUpdateRootAfterTimestamp(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
         $set->updateTimestamp($repo->timestampDoc());
 
         $repo->rootVersion = 2;
 
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $set->updateRoot($repo->rootDoc());
     }
 
     public function testExpiredRootRejectedAtTimestampUpdate(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $repo->rootExpires = '2000-01-01T00:00:00Z';
         $set = new TrustedMetadataSet($repo->rootDoc()); // initial root: expiry not checked
 
@@ -107,7 +108,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testTimestampVersionRollbackRejected(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         $repo->timestampVersion = 2;
@@ -121,7 +122,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testTimestampSnapshotRollbackRejected(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         $repo->snapshotVersion = 2;
@@ -137,7 +138,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testSnapshotLengthOrHashMismatchRejected(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
         $set->updateTimestamp($repo->timestampDoc());
 
@@ -148,7 +149,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testSnapshotVersionMustMatchTimestamp(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         $snapshot = $repo->snapshotDoc();
@@ -173,7 +174,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testSnapshotTargetsRollbackRejected(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         // Timestamp constrains only the snapshot version (no length/hashes), so
@@ -206,7 +207,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testExpiredTimestampRejectedAtSnapshotUpdate(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $repo->timestampExpires = '2000-01-01T00:00:00Z';
         $set = new TrustedMetadataSet($repo->rootDoc());
         $set->updateTimestamp($repo->timestampDoc()); // loading an expired timestamp is allowed
@@ -217,7 +218,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testExpiredSnapshotRejectedAtTargetsUpdate(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $repo->snapshotExpires = '2000-01-01T00:00:00Z';
         $set = new TrustedMetadataSet($repo->rootDoc());
         $set->updateTimestamp($repo->timestampDoc());
@@ -229,7 +230,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testTargetsVersionMustMatchSnapshot(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         $targets = $repo->targetsDoc();
@@ -269,7 +270,7 @@ final class TrustedMetadataSetTest extends TestCase
 
     public function testKeyRotationInvalidatesOldTimestampKey(): void
     {
-        $repo = new RepoBuilder();
+        $repo = new RepoBuilder;
         $set = new TrustedMetadataSet($repo->rootDoc());
 
         $oldTimestampKey = $repo->timestampKey;
