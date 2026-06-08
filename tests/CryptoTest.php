@@ -44,7 +44,7 @@ final class CryptoTest extends TestCase
         $message = 'x';
         $signature = bin2hex(sodium_crypto_sign_detached($message, sodium_crypto_sign_secretkey($pair)));
 
-        fact(Crypto::verify('rsassa-pss-sha256', $public, $message, $signature))->false();
+        fact(Crypto::verify('rsassa-pss-sha512', $public, $message, $signature))->false();
     }
 
     public function testRejectsMalformedSignatureHex(): void
@@ -77,5 +77,29 @@ final class CryptoTest extends TestCase
         fact(openssl_sign($message, $signature, $key, OPENSSL_ALGO_SHA256))->true();
 
         return [$pem, $message, bin2hex($signature), $point];
+    }
+
+    public function testVerifiesRsaPssSha256Signature(): void
+    {
+        // Cross-implementation vector: signed by OpenSSL with rsa_pss_saltlen:digest
+        // (salt length = digest length), the parameters securesystemslib uses.
+        $public = self::rsaPssFixture('public.pem');
+        $message = self::rsaPssFixture('message.bin');
+        $signature = trim(self::rsaPssFixture('signature.hex'));
+
+        fact(Crypto::verify('rsassa-pss-sha256', $public, $message, $signature))->true();
+        fact(Crypto::verify('rsassa-pss-sha256', $public, 'tampered', $signature))->false();
+        fact(Crypto::verify('rsassa-pss-sha256', self::rsaPssFixture('public-other.pem'), $message, $signature))->false();
+
+        $flipped = substr($signature, 0, -1) . ($signature[-1] === '0' ? '1' : '0');
+        fact(Crypto::verify('rsassa-pss-sha256', $public, $message, $flipped))->false();
+    }
+
+    private static function rsaPssFixture(string $name): string
+    {
+        $contents = file_get_contents(__DIR__ . '/fixtures/rsa-pss/' . $name);
+        fact($contents)->isString();
+
+        return $contents;
     }
 }
