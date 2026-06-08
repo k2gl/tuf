@@ -37,7 +37,7 @@
   },
   "suggest": {
     "ext-sodium": "Ed25519 signature verification (ed25519 key scheme)",
-    "ext-openssl": "ECDSA P-256 signature verification (ecdsa-sha2-nistp256 key scheme)"
+    "ext-openssl": "ECDSA P-256 and RSASSA-PSS signature verification (ecdsa-sha2-nistp256, rsassa-pss-sha256 key schemes)"
   },
   "autoload": {
     "psr-4": {

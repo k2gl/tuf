@@ -48,10 +48,10 @@ Requires PHP 8.1+ and `ext-json`. For signature verification, enable the
 extension matching the repository's key schemes:
 
 - `ext-sodium` for `ed25519` keys;
-- `ext-openssl` for `ecdsa-sha2-nistp256` keys.
+- `ext-openssl` for `ecdsa-sha2-nistp256` and `rsassa-pss-sha256` keys.
 
-`rsassa-pss-sha256` is not verified by this version: such a signature simply does
-not count toward a threshold (fail-closed).
+Any other scheme, an unloadable key, or a malformed signature simply does not
+count toward a threshold (fail-closed).
 
 ## Usage
 

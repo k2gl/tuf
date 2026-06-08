@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+- **RSASSA-PSS signature verification.** The `rsassa-pss-sha256` key scheme is now
+  verified (EMSA-PSS-VERIFY per RFC 8017 — SHA-256, MGF1-SHA256, 32-byte salt, the
+  parameters securesystemslib signs with), using `ext-openssl` only, so the package
+  keeps its zero-dependency footprint. Such signatures previously did not count
+  toward a threshold.
+
 ## 1.0.0
 
 First public release: a minimal, fail-closed TUF (The Update Framework) client.
