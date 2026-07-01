@@ -11,7 +11,7 @@ A fail-closed TUF (The Update Framework) client for PHP. Starting from an embedd
 downloads targets, every byte verified against threshold-signed metadata or it throws.
 
 The motivating use case is fetching Sigstore's `trusted_root.json` securely, but
-the client is a faithful, general TUF implementation with no Sigstore specifics
+the client is a complete, general TUF implementation with no Sigstore specifics
 baked in.
 
 ## What it guarantees
