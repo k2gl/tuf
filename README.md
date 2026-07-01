@@ -6,12 +6,9 @@
 [![PHPStan Level](https://img.shields.io/badge/PHPStan-level%209-2a5ea7?logo=php&logoColor=white)](https://phpstan.org)
 [![License](https://img.shields.io/packagist/l/k2gl/tuf?color=yellowgreen)](https://packagist.org/packages/k2gl/tuf)
 
-A minimal, **fail-closed** [TUF](https://theupdateframework.io/) (The Update
-Framework) client for PHP. Given an embedded trust anchor (the initial
-`root.json`) and a repository to talk to, it refreshes the signed metadata in the
-order the specification mandates and lets you resolve and download individual
-targets — with every byte verified against threshold-signed metadata, or an
-exception.
+A fail-closed TUF (The Update Framework) client for PHP. Starting from an embedded
+`root.json` trust anchor, it refreshes signed metadata in the order the spec mandates and
+downloads targets, every byte verified against threshold-signed metadata or it throws.
 
 The motivating use case is fetching Sigstore's `trusted_root.json` securely, but
 the client is a faithful, general TUF implementation with no Sigstore specifics
