@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0
+
+- **Expose the trusted root's raw bytes.** `TrustedMetadataSet::rootBytes()` and
+  `Updater::getTrustedRootBytes()` return the currently trusted root exactly as
+  verified, including after any rotation performed during `refresh()`. Lets a
+  caller persist the latest root locally (spec 5.3.11) instead of always
+  starting the next refresh from an old embedded one.
+
 ## 1.1.0
 
 - **RSASSA-PSS signature verification.** The `rsassa-pss-sha256` key scheme is now

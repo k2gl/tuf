@@ -55,6 +55,33 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
         fact($updater->getTargetInfo('trusted_root.json'))->notNull();
     }
 
+    public function testGetTrustedRootBytesReturnsLatestRootAfterRotation(): void
+    {
+        $repo = new RepoBuilder;
+        $rootV1 = $repo->rootDoc();
+
+        $repo->timestampKey = SigningKey::generate();
+        $repo->rootVersion = 2;
+        $rootV2 = $repo->rootDoc([$repo->rootKey]);
+
+        $fetcher = $this->publish($repo);
+        $fetcher->put(self::META_URL . '/2.root.json', $rootV2);
+
+        $updater = new Updater($rootV1, self::META_URL, self::TARGET_URL, $fetcher);
+        $updater->refresh();
+
+        fact($updater->getTrustedRootBytes())->is($rootV2);
+    }
+
+    public function testGetTrustedRootBytesBeforeRefreshThrows(): void
+    {
+        $repo = new RepoBuilder;
+        $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $this->publish($repo));
+
+        $this->expectException(LogicException::class);
+        $updater->getTrustedRootBytes();
+    }
+
     public function testGetTargetInfoReturnsNullForUnknownTarget(): void
     {
         $repo = new RepoBuilder;

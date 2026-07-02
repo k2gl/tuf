@@ -115,6 +115,19 @@ it deliberately. Its own expiry is intentionally not enforced on load — the
 refresh immediately walks the root version chain to the latest — but every other
 piece of metadata must be current.
 
+## Persisting a rotated root
+
+If the repository has rotated its root since the copy you embedded, `refresh()`
+walks the version chain and trusts the newer one for that process — but the
+next process still starts from the old embedded `root.json` and has to walk
+the same chain again. Persist the latest trusted root after a successful
+refresh and load it next time instead of the embedded one:
+
+```php
+$updater->refresh();
+file_put_contents($localRootPath, $updater->getTrustedRootBytes());
+```
+
 ## Lower-level API
 
 For advanced or fully offline use, `TrustedMetadataSet` is the verification core

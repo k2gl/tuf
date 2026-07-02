@@ -41,6 +41,7 @@ use LogicException;
 final class TrustedMetadataSet
 {
     private Root $root;
+    private string $rootBytes;
     private ?Timestamp $timestamp = null;
     private ?Snapshot $snapshot = null;
 
@@ -58,6 +59,16 @@ final class TrustedMetadataSet
     public function root(): Root
     {
         return $this->root;
+    }
+
+    /**
+     * The raw bytes of the currently trusted root, exactly as verified — for a
+     * caller to persist locally (5.3.11), so the next refresh can start from
+     * the latest known root instead of an old embedded one.
+     */
+    public function rootBytes(): string
+    {
+        return $this->rootBytes;
     }
 
     public function timestamp(): ?Timestamp
@@ -107,6 +118,7 @@ final class TrustedMetadataSet
         // Signed by a threshold of its own (new) keys.
         $newRoot->verifyDelegate('root', $metadata);
         $this->root = $newRoot;
+        $this->rootBytes = $rootBytes;
 
         return $newRoot;
     }
@@ -265,6 +277,7 @@ final class TrustedMetadataSet
         // (signed by its own keys). Its expiry is not checked here, by design.
         $root->verifyDelegate('root', $metadata);
         $this->root = $root;
+        $this->rootBytes = $rootBytes;
     }
 
     private function delegator(string $delegatorName): Root|Targets
