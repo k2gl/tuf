@@ -65,6 +65,17 @@ final class Updater
     }
 
     /**
+     * The raw bytes of the current trusted root (after any rotations performed
+     * during {@see refresh()}), for the caller to persist locally so the next
+     * refresh can start from the latest known root instead of an old embedded
+     * one (5.3.11). Call {@see refresh()} first.
+     */
+    public function getTrustedRootBytes(): string
+    {
+        return $this->requireRefreshed()->rootBytes();
+    }
+
+    /**
      * The verified metadata for a target path, or null if no trusted targets
      * role lists it. Walks delegations depth-first, fetching delegated targets
      * metadata as needed. Call {@see refresh()} first.

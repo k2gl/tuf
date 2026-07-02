@@ -43,6 +43,21 @@ final class TrustedMetadataSetTest extends TestCase
         fact($set->root()->version)->is(2);
     }
 
+    public function testRootBytesTracksTheCurrentlyTrustedRoot(): void
+    {
+        $repo = new RepoBuilder;
+        $rootV1 = $repo->rootDoc();
+        $set = new TrustedMetadataSet($rootV1);
+
+        fact($set->rootBytes())->is($rootV1);
+
+        $repo->rootVersion = 2;
+        $rootV2 = $repo->rootDoc();
+        $set->updateRoot($rootV2);
+
+        fact($set->rootBytes())->is($rootV2);
+    }
+
     public function testUpdateRootRejectsNonConsecutiveVersion(): void
     {
         $repo = new RepoBuilder;
