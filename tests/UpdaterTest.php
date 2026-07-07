@@ -75,11 +75,12 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
 
     public function testGetTrustedRootBytesBeforeRefreshThrows(): void
     {
+        // arrange
         $repo = new RepoBuilder;
         $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $this->publish($repo));
 
-        $this->expectException(LogicException::class);
-        $updater->getTrustedRootBytes();
+        // act + assert
+        fact(static fn () => $updater->getTrustedRootBytes())->throws(LogicException::class);
     }
 
     public function testGetTargetInfoReturnsNullForUnknownTarget(): void
@@ -93,6 +94,7 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
 
     public function testDownloadRejectsTamperedTarget(): void
     {
+        // arrange
         $repo = new RepoBuilder;
         $fetcher = $this->publish($repo);
         // Serve different bytes of the same length under the target's content path.
@@ -103,17 +105,18 @@ final class UpdaterTest extends \PHPUnit\Framework\TestCase
         $info = $updater->getTargetInfo('trusted_root.json');
         fact($info)->notNull();
 
-        $this->expectException(LengthOrHashMismatchException::class);
-        $updater->downloadTarget($info);
+        // act + assert
+        fact(static fn () => $updater->downloadTarget($info))->throws(LengthOrHashMismatchException::class);
     }
 
     public function testQueryBeforeRefreshThrows(): void
     {
+        // arrange
         $repo = new RepoBuilder;
         $updater = new Updater($repo->rootDoc(), self::META_URL, self::TARGET_URL, $this->publish($repo));
 
-        $this->expectException(LogicException::class);
-        $updater->getTargetInfo('trusted_root.json');
+        // act + assert
+        fact(static fn () => $updater->getTargetInfo('trusted_root.json'))->throws(LogicException::class);
     }
 
     /** Publish a consistent-snapshot repository for the builder into a fresh fetcher. */

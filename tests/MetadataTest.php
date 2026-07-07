@@ -30,6 +30,7 @@ final class MetadataTest extends TestCase
 
     public function testRejectsMetadataNotSignedByRole(): void
     {
+        // arrange
         $repo = new RepoBuilder;
         // Sign the root payload with an unrelated key, not the configured root key.
         $metadata = Metadata::fromJson($repo->rootDoc([SigningKey::generate()]));
@@ -37,12 +38,13 @@ final class MetadataTest extends TestCase
         $root = $metadata->signed;
         fact($root)->instanceOf(Root::class);
 
-        $this->expectException(UnsignedMetadataException::class);
-        $root->verifyDelegate('root', $metadata);
+        // act + assert
+        fact(static fn () => $root->verifyDelegate('root', $metadata))->throws(UnsignedMetadataException::class);
     }
 
     public function testRejectsThresholdNotMet(): void
     {
+        // arrange
         $repo = new RepoBuilder;
         $repo->rootThreshold = 2; // one signature cannot satisfy a threshold of two
         $metadata = Metadata::fromJson($repo->rootDoc());
@@ -50,19 +52,19 @@ final class MetadataTest extends TestCase
         $root = $metadata->signed;
         fact($root)->instanceOf(Root::class);
 
-        $this->expectException(UnsignedMetadataException::class);
-        $root->verifyDelegate('root', $metadata);
+        // act + assert
+        fact(static fn () => $root->verifyDelegate('root', $metadata))->throws(UnsignedMetadataException::class);
     }
 
     public function testRejectsInvalidJson(): void
     {
-        $this->expectException(RepositoryException::class);
-        Metadata::fromJson('{not json');
+        // act + assert
+        fact(static fn () => Metadata::fromJson('{not json'))->throws(RepositoryException::class);
     }
 
     public function testRejectsDocumentWithoutSignedAndSignatures(): void
     {
-        $this->expectException(RepositoryException::class);
-        Metadata::fromJson('{"signed":{}}');
+        // act + assert
+        fact(static fn () => Metadata::fromJson('{"signed":{}}'))->throws(RepositoryException::class);
     }
 }
