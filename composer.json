@@ -1,6 +1,6 @@
 {
   "name": "k2gl/tuf",
-  "description": "TUF (The Update Framework) client for PHP: fetch and verify signed metadata and targets.",
+  "description": "TUF (The Update Framework) client for PHP: fetch and verify signed metadata and targets",
   "homepage": "https://github.com/k2gl/tuf",
   "type": "library",
   "license": "MIT",
