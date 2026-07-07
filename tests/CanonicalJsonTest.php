@@ -59,7 +59,7 @@ final class CanonicalJsonTest extends TestCase
 
     public function testRejectsFloats(): void
     {
-        $this->expectException(RepositoryException::class);
-        CanonicalJson::encode(1.5);
+        // act + assert
+        fact(static fn () => CanonicalJson::encode(1.5))->throws(RepositoryException::class);
     }
 }
