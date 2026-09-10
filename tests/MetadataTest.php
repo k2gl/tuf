@@ -24,8 +24,7 @@ final class MetadataTest extends TestCase
         fact($metadata->signed)->instanceOf(Root::class);
         fact($metadata->signed->version)->is(1);
 
-        $metadata->signed->verifyDelegate('root', $metadata);
-        $this->addToAssertionCount(1);
+        fact(fn () => $metadata->signed->verifyDelegate('root', $metadata))->doesNotThrow();
     }
 
     public function testRejectsMetadataNotSignedByRole(): void
