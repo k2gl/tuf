@@ -58,7 +58,7 @@ final class SigstoreTufE2eTest extends TestCase
         fact($decoded)->isArray();
         /** @var array<string, mixed> $decoded */
         fact($decoded['mediaType'] ?? null)->is('application/vnd.dev.sigstore.trustedroot+json;version=0.1');
-        fact(is_array($decoded['certificateAuthorities'] ?? null))->true();
+        fact($decoded['certificateAuthorities'] ?? null)->isArray();
     }
 
     private static function read(string $path): string

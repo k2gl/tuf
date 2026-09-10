@@ -79,20 +79,10 @@ final class TrustedMetadataSetTest extends TestCase
         $repo->rootVersion = 2;
 
         // Signed only by the new key: the old root's threshold is not met.
-        try {
-            $set->updateRoot($repo->rootDoc([$repo->rootKey]));
-            self::fail('Expected UnsignedMetadataException for missing old-key signature.');
-        } catch (UnsignedMetadataException) {
-            $this->addToAssertionCount(1);
-        }
+        fact(fn () => $set->updateRoot($repo->rootDoc([$repo->rootKey])))->throws(UnsignedMetadataException::class);
 
         // Signed only by the old key: the new root's threshold is not met.
-        try {
-            $set->updateRoot($repo->rootDoc([$oldRootKey]));
-            self::fail('Expected UnsignedMetadataException for missing new-key signature.');
-        } catch (UnsignedMetadataException) {
-            $this->addToAssertionCount(1);
-        }
+        fact(fn () => $set->updateRoot($repo->rootDoc([$oldRootKey])))->throws(UnsignedMetadataException::class);
 
         // Signed by both: accepted.
         $root = $set->updateRoot($repo->rootDoc([$oldRootKey, $repo->rootKey]));
@@ -297,12 +287,7 @@ final class TrustedMetadataSetTest extends TestCase
         $set->updateRoot($repo->rootDoc([$repo->rootKey]));
 
         // The old timestamp key is no longer trusted.
-        try {
-            $set->updateTimestamp($repo->timestampDoc($oldTimestampKey));
-            self::fail('Expected UnsignedMetadataException for rotated-out timestamp key.');
-        } catch (UnsignedMetadataException) {
-            $this->addToAssertionCount(1);
-        }
+        fact(fn () => $set->updateTimestamp($repo->timestampDoc($oldTimestampKey)))->throws(UnsignedMetadataException::class);
 
         // The new timestamp key works.
         $timestamp = $set->updateTimestamp($repo->timestampDoc());
