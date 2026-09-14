@@ -55,7 +55,6 @@ final class HttpFetcher implements Fetcher
         $body = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         $error = curl_error($handle);
-        curl_close($handle);
 
         if (! is_string($body) || $error !== '') {
             throw new DownloadException(\sprintf('Failed to fetch "%s": %s', $url, $error === '' ? 'unknown error' : $error));
